@@ -89,7 +89,7 @@ describe('BasicDetails Component', () => {
   });
 
   it('calls fetch API on valid submit', async () => {
-    //cros issue
+    // cros issue
     const fetchStub = sinon.stub(window, 'fetch');
 
     fetchStub.resolves({
