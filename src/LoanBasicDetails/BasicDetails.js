@@ -234,7 +234,7 @@ export class BasicDetails extends LocalizeMixin(LitElement) {
     console.log(basic);
     // e.preventDefault();
 
-    fetch('https://loanfeapi.herokuapp.com/calculate-emi', {
+    return fetch('https://loanfeapi.herokuapp.com/calculate-emi', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
