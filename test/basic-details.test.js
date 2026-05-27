@@ -88,72 +88,73 @@ describe('BasicDetails Component', () => {
     clock.restore();
   });
 
-  it('calls fetch API on valid submit', async () => {
-    // cros issue
+  it('calls fetch API and navigates to emi details on valid submit', async () => {
     const fetchStub = sinon.stub(window, 'fetch');
 
     fetchStub.resolves({
-      json: async () => ({
-        emi: 2000,
-      }),
+      json: async () => ({ emi: 2000 }),
     });
 
     const routerStub = sinon.stub(Router, 'go');
 
-    element.shadowRoot.querySelector('.amount').value =
-      '50000';
-
-    element.shadowRoot.querySelector('.period').value =
-      '5';
+    element.shadowRoot.querySelector('.amount').value = '50000';
+    element.shadowRoot.querySelector('.period').value = '5';
 
     await element._captureDetails();
 
-    expect(fetchStub.calledOnce).to.be.false;
-    expect(routerStub.calledWith('/emidetails')).to.be.false;
+    expect(fetchStub.calledOnce).to.be.true;
+    expect(routerStub.calledOnce).to.be.true;
+    expect(routerStub.calledWith('/emidetails')).to.be.true;
+    expect(JSON.parse(localStorage.getItem('emi')).emi).to.equal(2000);
+    expect(element.emiCalc.emi).to.equal(2000);
+  });
+
+  it('does not submit when amount is below minimum', async () => {
+    const fetchStub = sinon.stub(window, 'fetch');
+    const routerStub = sinon.stub(Router, 'go');
+
+    element.shadowRoot.querySelector('.amount').value = '5000';
+    element.shadowRoot.querySelector('.period').value = '5';
+
+    await element._captureDetails();
+
+    expect(fetchStub.called).to.be.false;
+    expect(routerStub.called).to.be.false;
+    expect(
+      element.shadowRoot.querySelector('.amount').classList.contains('e-handle')
+    ).to.be.true;
   });
 
   it('stores EMI data in localStorage', async () => {
     const fetchStub = sinon.stub(window, 'fetch');
 
     fetchStub.resolves({
-      json: async () => ({
-        emi: 10000,
-      }),
+      json: async () => ({ emi: 10000 }),
     });
 
     sinon.stub(Router, 'go');
 
-    element.shadowRoot.querySelector('.amount').value =
-      '80000';
-
-    element.shadowRoot.querySelector('.period').value =
-      '10';
+    element.shadowRoot.querySelector('.amount').value = '80000';
+    element.shadowRoot.querySelector('.period').value = '10';
 
     await element._captureDetails();
-// As currently having cros issue not able to fetch the api response so the emi will be null
-    const emi = JSON.parse(
-      localStorage.getItem('emi')
-    );
 
-  expect(emi).to.not.equal(null);
+    const emi = JSON.parse(localStorage.getItem('emi'));
+
+    expect(emi).to.deep.equal({ emi: 10000 });
   });
 
   it('updates emiCalc after API response', async () => {
     const fetchStub = sinon.stub(window, 'fetch');
-// As currently having cros issue not able to fetch the api response so the emi will be null
+
     fetchStub.resolves({
-      json: async () => ({
-        emi: 3000,
-      }),
+      json: async () => ({ emi: 3000 }),
     });
 
     sinon.stub(Router, 'go');
 
-    element.shadowRoot.querySelector('.amount').value =
-      '70000';
-
-    element.shadowRoot.querySelector('.period').value =
-      '8';
+    element.shadowRoot.querySelector('.amount').value = '70000';
+    element.shadowRoot.querySelector('.period').value = '8';
 
     await element._captureDetails();
 
